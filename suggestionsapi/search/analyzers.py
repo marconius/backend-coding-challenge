@@ -13,11 +13,19 @@ class KeywordAnalyzer(Analyzer):
         return [value]
 
 
-
 class AutocompleteAnalyzer(Analyzer):
-    
+    MIN_GRAM = 3
+
     def analyze(self, value: str) -> List[str]:
-        return []
+        tokens = []
+        words = value.split(' ')
+        for word in words:
+            length = self.MIN_GRAM
+            while length < len(word):
+                tokens.append(word[0:length])
+                length += 1
+            tokens.append(word)
+        return tokens
 
 
 class ListAnalyzer(Analyzer):

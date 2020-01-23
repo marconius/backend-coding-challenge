@@ -23,5 +23,5 @@ class SearchManager():
 
     def search(self, q: str, lnglat: Optional[Tuple[float, float]]=None) -> List[Any]:
         # TODO: support more than one token!!!!
-        matches = self.index[q]
+        matches = self.index.get(q, [])
         return [self.documents[i] for i in matches]

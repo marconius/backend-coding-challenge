@@ -10,3 +10,8 @@ class ViewsTestCase(TestCase):
         response = self.test_client.get('/suggestions', {'q': '6077243'})
 
         self.assertEqual(200, response.status_code)
+
+    def test_suggestions_no_matches(self):
+        response = self.test_client.get('/suggestions', {'q': 'asdflajsdflkjsadflkjsdflkjsdf'})
+
+        self.assertEqual(200, response.status_code)

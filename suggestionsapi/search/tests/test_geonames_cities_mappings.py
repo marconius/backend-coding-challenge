@@ -27,12 +27,12 @@ class MappingsTestCase(TestCase):
         self.mappings.get_analyzer.assert_has_calls(expected_calls)
 
 
-    def test_it_produces_a_list_of_tokens_for_each_field(self):
-        expected_tokens = ["test123"]
+    def test_it_produces_a_set_of_tokens_for_each_field(self):
+        expected_tokens = {'test123'}
         self.mock_analyzer_instance.analyze.return_value = expected_tokens
         self.mappings.get_analyzer = Mock(return_value=self.mock_analyzer_instance)
 
-        tokens = self.mappings.analyze({'id': '12345'})
+        tokens = self.mappings.analyze({'id': '12345', 'other field': '12345'})
 
         self.assertEqual(tokens, expected_tokens)
 

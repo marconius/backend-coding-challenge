@@ -20,4 +20,4 @@ class SuggestionsConfig(AppConfig):
         
         search_manager.bulk_add_documents(loader.documents)
         
-        print(len(loader.documents), "!@!!!!!")
+        print(len(loader.documents), "Documents loaded into Index")
