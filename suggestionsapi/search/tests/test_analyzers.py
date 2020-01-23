@@ -45,3 +45,22 @@ class AutocompleteAnalyzerTestCase(TestCase):
             'Cartier',
             'bo'
         ])
+
+class ListAnalyzerTestCase(TestCase):
+    def setUp(self):
+        self.analyzer = ListAnalyzer()
+
+    def test_it_generates_keyword_tokens_for_each_item_in_list(self):
+        tokens = self.analyzer.analyze(
+            'Edmundston,Ehdmundston,edomonsuton,Едмундстон,Эдмундстон,اڈمنڈسٹن,エドモンストン'
+        )
+
+        self.assertEqual(tokens, [
+            'Edmundston',
+            'Ehdmundston',
+            'edomonsuton',
+            'Едмундстон',
+            'Эдмундстон',
+            'اڈمنڈسٹن',
+            'エドモンストン',
+        ])

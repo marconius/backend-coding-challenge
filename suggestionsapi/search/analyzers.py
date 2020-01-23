@@ -31,7 +31,7 @@ class AutocompleteAnalyzer(Analyzer):
 class ListAnalyzer(Analyzer):
     
     def analyze(self, value: str) -> List[str]:
-        return []
+        return value.split(',')
 
 
 class NoopAnalyzer(Analyzer):
