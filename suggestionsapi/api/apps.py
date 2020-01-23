@@ -1,4 +1,7 @@
+import os
+
 from django.apps import AppConfig
+from django.conf import settings
 
 from search.manager import SearchManager
 from search.geonames_cities_mappings import GeonamesCitiesMappings
@@ -12,9 +15,7 @@ class SuggestionsConfig(AppConfig):
     name = 'api'
     verbose_name = 'Location Suggestions'
     def ready(self):
-        loader = TsvDocumentsLoader(
-            '/home/baba/workspace/backend-coding-challenge/data/cities_canada-usa.tsv'
-        )
+        loader = TsvDocumentsLoader(os.path.join(settings.PROJECT_DIR, 'data/cities_canada-usa.tsv'))
         loader.load_documents()
         
         search_manager.bulk_add_documents(loader.documents)

@@ -1,0 +1,1 @@
+web: gunicorn --chdir suggestionsapi api.wsgi --log-file -
