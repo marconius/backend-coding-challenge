@@ -39,7 +39,7 @@ class SearchManager(Generic[T]):
                     self.index[token] = [(i, importance)]
         self.documents = documents
 
-    def search(self, query: str, lnglat: Optional[Tuple[float, float]] = None) -> Results:
+    def search(self, query: str, latlng: Optional[Tuple[float, float]] = None) -> Results:
         matches: Set[int] = set()
         first_term = True
         terms = re.split('[ -]', query)
@@ -61,10 +61,13 @@ class SearchManager(Generic[T]):
         for i in matches:
             doc = self.documents[i]
             score = weights[i]
-            # TODO: boost
+
+            boost = 1
+            for booster in self.mappings.boosts:
+                boost *= booster(latlng, doc, score) if latlng else 1
 
             results.append({
-                'score': score,
+                'score': score * boost,
                 'doc': doc,
             })
 

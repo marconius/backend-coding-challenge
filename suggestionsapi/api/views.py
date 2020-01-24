@@ -6,7 +6,10 @@ from .apps import SEARCH_MANAGER
 
 def suggest(request):
     if request.method in ['GET', 'POST']:
-        results = SEARCH_MANAGER.search(request.GET['q'])
+        lat = request.GET.get('latitude')
+        lng = request.GET.get('longitude')
+        latlng = (lat, lng) if lat and lng else None
+        results = SEARCH_MANAGER.search(request.GET['q'], latlng)
 
         content = [serialize_result(hit, results.max_score) for hit in results.hits]
         return HttpResponse(content, content_type='application/json', status=200)
