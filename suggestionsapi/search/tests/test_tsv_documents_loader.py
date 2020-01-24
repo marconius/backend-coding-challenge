@@ -11,7 +11,8 @@ class TsvDocumentsLoaderTestCase(TestCase):
 
     def test_it_loads_data_from_path(self):
         self.test_loader = TsvDocumentsLoader(
-            '/home/baba/workspace/backend-coding-challenge/suggestionsapi/search/tests/fake_cities_canada-usa.tsv'
+            '/home/baba/workspace/backend-coding-challenge/suggestionsapi/' +
+            'search/tests/fake_cities_canada-usa.tsv'
         )
         self.test_loader.load_documents()
 

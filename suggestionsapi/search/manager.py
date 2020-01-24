@@ -1,27 +1,72 @@
-from typing import Any, Dict, List, Optional, Tuple
+import re
+from math import log
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Tuple, Set
 
-class Results():
-    pass
+
+T = TypeVar('T')
 
 
-class SearchManager():
+class Hit(Generic[T]):
+    def __init__(self, doc: T, score: float) -> None:
+        self.doc = doc
+        self.score = score
 
+
+class Results(Generic[T]):
+    def __init__(self, max_score: float, hits: List[Hit[T]]):
+        self.max_score = max_score
+        self.hits = hits
+
+    @classmethod
+    def from_list(cls, results: List[Any]) -> 'Results':
+        max_score = results[0]['score'] if results else None
+        return cls(max_score, hits=results)
+
+
+class SearchManager(Generic[T]):
     def __init__(self, mappings):
         self.mappings = mappings
-        # self.bulk_add_documents(documents)
-        self.index = {}
+        self.index: Dict[str, List[Tuple[int, float]]] = {}
+        self.documents: List[T] = []
 
-    def bulk_add_documents(self, documents):
+    def bulk_add_documents(self, documents: List[T]):
         for i, doc in enumerate(documents):
-            tokens = self.mappings.analyze(doc)
-            for token in tokens:
+            analyses = self.mappings.analyze(doc)
+            for token, importance in analyses:
                 if token in self.index:
-                    self.index[token].append(i)
+                    self.index[token].append((i, importance))
                 else:
-                    self.index[token] = [i]
+                    self.index[token] = [(i, importance)]
         self.documents = documents
 
-    def search(self, q: str, lnglat: Optional[Tuple[float, float]]=None) -> List[Any]:
-        # TODO: support more than one token!!!!
-        matches = self.index.get(q, [])
-        return [self.documents[i] for i in matches]
+    def search(self, query: str, lnglat: Optional[Tuple[float, float]] = None) -> Results:
+        matches: Set[int] = set()
+        first_term = True
+        terms = re.split('[ -]', query)
+        weights: Dict[int, float] = {}  # store weights to combine them later
+        for term in terms:
+            docs_for_term = self.index.get(term, [])
+            if docs_for_term:
+                # idf reduces the importance of common words like `Saint` or `North`
+                idf = 1 + log(len(self.documents) / (len(docs_for_term) + 1))
+                for i, importance in docs_for_term:
+                    weights[i] = idf * importance
+            doc_idxs_for_term = [doc[0] for doc in docs_for_term]
+            if first_term:
+                matches = set(doc_idxs_for_term)
+                first_term = False
+            else:
+                matches = set(doc_idxs_for_term).intersection(matches)
+        results = []
+        for i in matches:
+            doc = self.documents[i]
+            score = weights[i]
+            # TODO: boost
+
+            results.append({
+                'score': score,
+                'doc': doc,
+            })
+
+        results.sort(key=lambda r: r['score'], reverse=True)
+        return Results.from_list(results)

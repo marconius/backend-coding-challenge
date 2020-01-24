@@ -4,7 +4,6 @@ from search.analyzers import (
     AutocompleteAnalyzer,
     KeywordAnalyzer,
     ListAnalyzer,
-    NoopAnalyzer,
 )
 
 
@@ -15,7 +14,7 @@ class KeywordAnalyzerTestCase(TestCase):
     def test_it_generates_one_token_only(self):
         tokens = self.analyzer.analyze("any thing at all")
 
-        self.assertEqual(tokens, ["any thing at all"])
+        self.assertEqual(tokens, [("any thing at all", 1)])
 
 
 class AutocompleteAnalyzerTestCase(TestCase):
@@ -23,9 +22,13 @@ class AutocompleteAnalyzerTestCase(TestCase):
         self.analyzer = AutocompleteAnalyzer()
 
     def test_it_generates_edge_grams_of_minimum_three_charachers(self):
-        tokens = self.analyzer.analyze('Catherine Jacques Cartier bo')
+        tokens = self.analyzer.analyze('Saint-Catherine Jacques Cartier bo')
 
-        self.assertEqual(tokens, [
+        self.assertEqual([analysis[0] for analysis in tokens], [
+            'Saint-Catherine Jacques Cartier bo',
+            'Sai',
+            'Sain',
+            'Saint',
             'Cat',
             'Cath',
             'Cathe',
@@ -43,7 +46,7 @@ class AutocompleteAnalyzerTestCase(TestCase):
             'Carti',
             'Cartie',
             'Cartier',
-            'bo'
+            'bo',
         ])
 
 class ListAnalyzerTestCase(TestCase):
@@ -56,11 +59,11 @@ class ListAnalyzerTestCase(TestCase):
         )
 
         self.assertEqual(tokens, [
-            'Edmundston',
-            'Ehdmundston',
-            'edomonsuton',
-            'Едмундстон',
-            'Эдмундстон',
-            'اڈمنڈسٹن',
-            'エドモンストン',
+            ('Edmundston', 1.0),
+            ('Ehdmundston', 1.0),
+            ('edomonsuton', 1.0),
+            ('Едмундстон', 1.0),
+            ('Эдмундстон', 1.0),
+            ('اڈمنڈسٹن', 1.0),
+            ('エドモンストン', 1.0),
         ])

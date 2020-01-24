@@ -1,40 +1,49 @@
+import re
+
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from math import sqrt
+from typing import List, Tuple
 
 
 class Analyzer(metaclass=ABCMeta):
     @abstractmethod
-    def analyze(self, value: str) -> List[str]: pass
+    def analyze(self, value: str) -> List[Tuple[str, float]]:
+        pass
 
 
 class KeywordAnalyzer(Analyzer):
-    
-    def analyze(self, value: str) -> List[str]:
-        return [value]
+
+    def analyze(self, value: str) -> List[Tuple[str, float]]:
+        return [(value, 1.0)]
 
 
 class AutocompleteAnalyzer(Analyzer):
     MIN_GRAM = 3
 
-    def analyze(self, value: str) -> List[str]:
-        tokens = []
-        words = value.split(' ')
+    def analyze(self, value: str) -> List[Tuple[str, float]]:
+        tokens = [(value, 1.0)]
+        words = re.split('[- ]', value)
+        # matches in longer fields are less likely to matter
+        field_length_norm = 1 / sqrt(len(value))
         for word in words:
             length = self.MIN_GRAM
             while length < len(word):
-                tokens.append(word[0:length])
+                token = word[0:length]
+                analysis = (token, field_length_norm)
+                tokens.append(analysis)
                 length += 1
-            tokens.append(word)
+            analysis = (word, field_length_norm)
+            tokens.append(analysis)
         return tokens
 
 
 class ListAnalyzer(Analyzer):
-    
-    def analyze(self, value: str) -> List[str]:
-        return value.split(',')
+
+    def analyze(self, value: str) -> List[Tuple[str, float]]:
+        return [(token, 1.0) for token in value.split(',')]
 
 
 class NoopAnalyzer(Analyzer):
-    
-    def analyze(self, value: str) -> List[str]:
+
+    def analyze(self, value: str) -> List[Tuple[str, float]]:
         return []
