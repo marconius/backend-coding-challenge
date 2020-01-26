@@ -1,6 +1,6 @@
 from unittest.mock import Mock, call
 
-from django.test import Client, SimpleTestCase as TestCase
+from django.test import SimpleTestCase as TestCase
 
 from search.geonames_cities_mappings import GeonamesCitiesMappings
 from search.analyzers import (

@@ -13,6 +13,7 @@ from .analyzers import (
 
 
 def latlng_boost(latlng: Tuple[float, float], doc: Dict[str, str]):
+    """My stab at exponential decay"""
     scale = 50  # km
     decay = 0.5
     decay_norm = log(decay)/scale

@@ -7,20 +7,21 @@ from typing import List, Tuple
 
 class Analyzer(metaclass=ABCMeta):
     @abstractmethod
-    def analyze(self, value: str) -> List[Tuple[str, float]]:
+    def analyze(self, raw_value: str) -> List[Tuple[str, float]]:
         pass
 
 
 class KeywordAnalyzer(Analyzer):
 
-    def analyze(self, value: str) -> List[Tuple[str, float]]:
-        return [(value, 1.0)]
+    def analyze(self, raw_value: str) -> List[Tuple[str, float]]:
+        return [(raw_value.lower(), 1.0)]
 
 
 class AutocompleteAnalyzer(Analyzer):
     MIN_GRAM = 3
 
-    def analyze(self, value: str) -> List[Tuple[str, float]]:
+    def analyze(self, raw_value: str) -> List[Tuple[str, float]]:
+        value = raw_value.lower()
         tokens = [(value, 1.0)]
         words = re.split('[- ]', value)
         # matches in longer fields are less likely to matter
@@ -39,11 +40,11 @@ class AutocompleteAnalyzer(Analyzer):
 
 class ListAnalyzer(Analyzer):
 
-    def analyze(self, value: str) -> List[Tuple[str, float]]:
-        return [(token, 1.0) for token in value.split(',')]
+    def analyze(self, raw_value: str) -> List[Tuple[str, float]]:
+        return [(token.lower(), 1.0) for token in raw_value.split(',')]
 
 
 class NoopAnalyzer(Analyzer):
 
-    def analyze(self, value: str) -> List[Tuple[str, float]]:
+    def analyze(self, raw_value: str) -> List[Tuple[str, float]]:
         return []

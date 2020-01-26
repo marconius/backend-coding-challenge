@@ -25,27 +25,27 @@ class AutocompleteAnalyzerTestCase(TestCase):
         tokens = self.analyzer.analyze('Saint-Catherine Jacques Cartier bo')
 
         self.assertEqual([analysis[0] for analysis in tokens], [
-            'Saint-Catherine Jacques Cartier bo',
-            'Sai',
-            'Sain',
-            'Saint',
-            'Cat',
-            'Cath',
-            'Cathe',
-            'Cather',
-            'Catheri',
-            'Catherin',
-            'Catherine',
-            'Jac',
-            'Jacq',
-            'Jacqu',
-            'Jacque',
-            'Jacques',
-            'Car',
-            'Cart',
-            'Carti',
-            'Cartie',
-            'Cartier',
+            'saint-catherine jacques cartier bo',
+            'sai',
+            'sain',
+            'saint',
+            'cat',
+            'cath',
+            'cathe',
+            'cather',
+            'catheri',
+            'catherin',
+            'catherine',
+            'jac',
+            'jacq',
+            'jacqu',
+            'jacque',
+            'jacques',
+            'car',
+            'cart',
+            'carti',
+            'cartie',
+            'cartier',
             'bo',
         ])
 
@@ -55,15 +55,15 @@ class ListAnalyzerTestCase(TestCase):
 
     def test_it_generates_keyword_tokens_for_each_item_in_list(self):
         tokens = self.analyzer.analyze(
-            'Edmundston,Ehdmundston,edomonsuton,Едмундстон,Эдмундстон,اڈمنڈسٹن,エドモンストン'
+            'edmundston,ehdmundston,edomonsuton,едмундстон,эдмундстон,اڈمنڈسٹن,エドモンストン'
         )
 
         self.assertEqual(tokens, [
-            ('Edmundston', 1.0),
-            ('Ehdmundston', 1.0),
+            ('edmundston', 1.0),
+            ('ehdmundston', 1.0),
             ('edomonsuton', 1.0),
-            ('Едмундстон', 1.0),
-            ('Эдмундстон', 1.0),
+            ('едмундстон', 1.0),
+            ('эдмундстон', 1.0),
             ('اڈمنڈسٹن', 1.0),
             ('エドモンストン', 1.0),
         ])

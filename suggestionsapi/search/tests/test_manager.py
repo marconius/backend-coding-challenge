@@ -6,7 +6,6 @@ from django.test import SimpleTestCase as TestCase
 from search.manager import SearchManager
 
 
-@skip('Abandoning due to lack of time, revisit if refactoring search manager')
 class ManagerTestCase(TestCase):
 
     def test_it_exposes_an_index(self):
@@ -29,11 +28,11 @@ class ManagerTestCase(TestCase):
         mock_mappings.analyze.assert_has_calls(expected_calls)
         self.assertEqual(test_manager.documents, docs)
 
-    def test_it_stores_the_analyzed_tokens_in_the_index(self):
+    def test_it_stores_the_analyzed_tokens_in_the_index_and_idf(self):
         mock_mappings = Mock()
         mock_analyze = Mock(side_effect=[
-            ['token1', 'token2'],
-            ['token3', 'token2'],
+            [('token1', 1.0), ('token2', 0.8)],
+            [('token3', 1.0), ('token2', 0.3)],
         ])
         mock_mappings.analyze = mock_analyze
         test_manager = SearchManager(mappings=mock_mappings)
@@ -41,10 +40,13 @@ class ManagerTestCase(TestCase):
         test_manager.bulk_add_documents(['this would be a real doc', 'another real doc'])
 
         self.assertEqual(test_manager.index, {
-            'token1': [0],
-            'token2': [0, 1],
-            'token3': [1]
+            'token1': [(0, 1.0)],
+            'token2': [(0, 0.8), (1, 0.3)],
+            'token3': [(1, 1.0)]
         })
+        self.assertEqual(test_manager.idfs['token1'], 1.0)
+        self.assertEqual(test_manager.idfs['token3'], 1.0,)
+        self.assertLess(test_manager.idfs['token2'], test_manager.idfs['token3'])
 
 
 @skip('Abandoning due to lack of time, revisit if refactoring search manager')

@@ -27,44 +27,58 @@ class SearchManager(Generic[T]):
     def __init__(self, mappings):
         self.mappings = mappings
         self.index: Dict[str, List[Tuple[int, float]]] = {}
+        # idf reduces the importance of common words like `Saint` or `North`
+        # these are calculated during indexing
+        self.idfs: Dict[str, float] = {}
         self.documents: List[T] = []
 
     def bulk_add_documents(self, documents: List[T]):
+        if len(documents) == 0:
+            return
         for i, doc in enumerate(documents):
             analyses = self.mappings.analyze(doc)
             for token, importance in analyses:
+                num_docs_for_term = 1
                 if token in self.index:
-                    self.index[token].append((i, importance))
+                    docs = self.index[token]
+                    docs.append((i, importance))
+                    num_docs_for_term = len(docs)
                 else:
                     self.index[token] = [(i, importance)]
+                self.idfs[token] = 1 + log(len(documents) / (num_docs_for_term + 1))
         self.documents = documents
 
     def search(self, query: str, latlng: Optional[Tuple[float, float]] = None) -> Results:
-        matches: Set[int] = set()
+        position_of_matched_documents: Set[int] = set()
         first_term = True
-        terms = re.split('[ -]', query)
-        weights: Dict[int, float] = {}  # store weights to combine them later
+        terms = re.split('[ -]', query.lower())
+
+        # We store weights to combine them later. This makes it easier to use set, which in turn
+        # makes it easier to do `term1` AND `term2` as we build set of matches.
+        weights: Dict[int, float] = {}
+
         for term in terms:
             docs_for_term = self.index.get(term, [])
             if docs_for_term:
-                # idf reduces the importance of common words like `Saint` or `North`
-                idf = 1 + log(len(self.documents) / (len(docs_for_term) + 1))
                 for i, importance in docs_for_term:
-                    weights[i] = idf * importance
+                    weights[i] = self.idfs[term] * importance
             doc_idxs_for_term = [doc[0] for doc in docs_for_term]
             if first_term:
-                matches = set(doc_idxs_for_term)
+                position_of_matched_documents = set(doc_idxs_for_term)
                 first_term = False
             else:
-                matches = set(doc_idxs_for_term).intersection(matches)
+                position_of_matched_documents = set(
+                    doc_idxs_for_term
+                ).intersection(position_of_matched_documents)
+
         results = []
-        for i in matches:
+        for i in position_of_matched_documents:
             doc = self.documents[i]
             score = weights[i]
 
             boost = 1
             for booster in self.mappings.boosts:
-                boost *= booster(latlng, doc, score) if latlng else 1
+                boost *= booster(latlng, doc) if latlng else 1
 
             results.append({
                 'score': score * boost,

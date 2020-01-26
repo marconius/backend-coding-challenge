@@ -42,5 +42,7 @@ def serialize_result(hit, max_score):
         'name': '{}, {}, {}'.format(doc['name'], region, country),
         'latitude': doc['lat'],
         'longitude': doc['long'],
+        # Score definitely does _not_ reflect confidence. It is basically a dumb way to make the
+        # API show a value between 0 and 1.
         'score': hit['score'] / max_score,
     }
