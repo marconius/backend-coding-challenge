@@ -17,6 +17,7 @@ class ViewsTestCase(TestCase):
         response = self.test_client.get('/suggestions', {'q': 'asdflajsdflkjsadflkjsdflkjsdf'})
 
         self.assertEqual(200, response.status_code)
+        self.assertEqual({'suggestions': []}, response.json())
 
     @patch('api.views.SEARCH_MANAGER.search')
     def test_suggestions_with_lng_lat(self, search_stub):

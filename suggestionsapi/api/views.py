@@ -1,5 +1,4 @@
-from django.http import HttpResponseNotAllowed
-from django.shortcuts import HttpResponse
+from django.http import HttpResponseNotAllowed, JsonResponse
 
 from .apps import SEARCH_MANAGER
 
@@ -11,13 +10,13 @@ def suggest(request):
         latlng = (lat, lng) if lat and lng else None
         results = SEARCH_MANAGER.search(request.GET['q'], latlng)
 
-        content = [serialize_result(hit, results.max_score) for hit in results.hits]
-        return HttpResponse(content, content_type='application/json', status=200)
+        content = {'suggestions': [format_result(hit, results.max_score) for hit in results.hits]}
+        return JsonResponse(content, content_type='application/json', status=200)
 
     return HttpResponseNotAllowed(['GET', 'POST'])
 
 
-def serialize_result(hit, max_score):
+def format_result(hit, max_score):
     doc = hit['doc']
     canada_regions = {
         '01': 'AL',
